@@ -30,6 +30,7 @@
 * REVISION HISTORY:
 * Author		Date	    Comments
 * J. Steinlage		2015Aug10   Baseline Rev, first production support
+* J. Steinlage    2016Aug21   Added support for 1shot mode in .cpp files
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -79,8 +80,8 @@ void setup()
   SPI.setDataMode(SPI_MODE3);             // MAX31856 is a MODE3 device
   
   // call config command... options can be seen in the PlayingWithFusion_MAX31856.h file
-  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
-  thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
+  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
+  thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
 }
 
 void loop()
