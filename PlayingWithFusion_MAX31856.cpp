@@ -6,7 +6,7 @@
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
 * breakout boards: SEN-30005, SEN-30006 (any TC type)
 *
-* Copyright © 2015 Playing With Fusion, Inc.
+* Copyright Â© 2015 Playing With Fusion, Inc.
 * SOFTWARE LICENSE AGREEMENT: This code is released under the MIT License.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
@@ -92,12 +92,24 @@ void PWF_MAX31856::_sing_reg_write(uint8_t RegAdd, uint8_t BitMask, uint8_t RegD
 	digitalWrite(_cs, HIGH);						// set pin high to end SPI session
 }
 
-void PWF_MAX31856::MAX31856_config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE)
+void PWF_MAX31856::MAX31856_config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE)
 {
+	// TC_TYPE: B_TYPE, E_TYPE, J_TYPE, K_TYPE, N_TYPE, R_TYPE, S_TYPE, T_TYPE
+	// FILT_FREQ: CUTOFF_60HZ, CUTOFF_50HZ
+	// AVG_MODE: AVG_SEL_1SAMP, AVG_SEL_2SAMP, AVG_SEL_4SAMP, AVG_SEL_8SAMP, AVG_SEL_16SAMP
+	// MEAS_MODE: CMODE_OFF, CMODE_AUTO
+	
 	uint8_t regdat = 0;		// set up paramater to compile register configs
 	
 	// set CR0 (REG_CR0)
-	regdat = (CMODE_AUTO | ONESHOT_OFF | OCFAULT_10MS | CJ_ENABLED | FAULT_AUTO | FAULT_CLR_DEF | FILT_FREQ);
+	if(CMODE_AUTO == MEAS_MODE) // auto conversion mode selected (~100ms interval sampling)
+	{
+		regdat = (CMODE_AUTO | ONESHOT_OFF | OCFAULT_10MS | CJ_ENABLED | FAULT_AUTO | FAULT_CLR_DEF | FILT_FREQ);
+	}
+	else	// else it's single-shot mode
+	{
+		regdat = (CMODE_OFF | ONESHOT_OFF | OCFAULT_10MS | CJ_ENABLED | FAULT_AUTO | FAULT_CLR_DEF | FILT_FREQ);
+	}
 	_sing_reg_write(REG_CR0, 0xFF, regdat);	// write data to register
 /*	CRO, 00h/80h:[7] cmode (0=off (default), 1=auto conv mode)
 		[6] 1shot (0=off, default)
@@ -175,6 +187,17 @@ void PWF_MAX31856::MAX31856_update(struct var_max31856 *tc_ptr)
 	tc_ptr->lin_tc_temp = tc_temp;
 }
 
+void PWF_MAX31856::MAX31856_1shot_start(void)
+{
+
+	_sing_reg_write(REG_CR0, ONESHOT_ON, ONESHOT_ON);	// set the 1shot bit
+	// note, it takes approximately 143ms to perform the conversion in 60-Hz filter mode
+	// and 169ms in 50-Hz filter mode. Keep this in mind if not using DRDY output for interrupt.
+	// Call the MAX31856_update command after the conversion is complete to read the new value.
+	// Also, don't run simultaneous conversions on multiple MAX chips if they are electrically connected
+	// as the readings will likely be skewed.
+}
+
 void PWF_MAX31856::MAX31856_CJ_offset(int8_t offset_val)	// offset is 2^-4 degC/bit
 {
 	/*	CJTO, 09h/89h: Cold Junction Temperature Offset (int8_t, default 0x00) */
@@ -184,4 +207,3 @@ void PWF_MAX31856::MAX31856_CJ_offset(int8_t offset_val)	// offset is 2^-4 degC/
 	// might need to write special handling for the signedness of the offset_val...
 	_sing_reg_write(REG_CJTO, 0xFF, (uint8_t) offset_val);
 }
-
