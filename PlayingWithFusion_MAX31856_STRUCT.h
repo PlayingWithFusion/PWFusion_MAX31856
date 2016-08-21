@@ -4,9 +4,9 @@
 * Development Environment: Arduino 1.6.1
 *
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
-* breakout boards: SEN-30005, SEN-30006 (any TC type)
+* breakout boards: SEN-30005, SEN-30006, SEN-30007 and SEN-30008 (any TC type)
 *
-* Copyright © 2015 Playing With Fusion, Inc.
+* Copyright Â© 2015 Playing With Fusion, Inc.
 * SOFTWARE LICENSE AGREEMENT: This code is released under the MIT License.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
