@@ -6,7 +6,7 @@
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
 * breakout boards: SEN-30005, SEN-30006 (any TC type)
 *
-* Copyright © 2015 Playing With Fusion, Inc.
+* Copyright Â© 2015 Playing With Fusion, Inc.
 * SOFTWARE LICENSE AGREEMENT: This code is released under the MIT License.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
@@ -110,10 +110,11 @@ class PWF_MAX31856
 {
  public:
   PWF_MAX31856(uint8_t CSx, uint8_t FAULTx, uint8_t DRDYx);
-  void MAX31856_config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE);
+  void MAX31856_config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE);
   void MAX31856_CJ_offset(int8_t offset_val);	// offset is 2^-4 degC/bit
   void SPIbus_Init(void);
   void MAX31856_update(struct var_max31856 *tc_ptr);
+  void MAX31856_1shot_start(void);
 
  private:
   uint8_t _cs, _fault, _drdy;
