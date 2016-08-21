@@ -1,5 +1,5 @@
 /***************************************************************************
-* File Name: SEN30006_MAX31856_example.ino
+* File Name: SEN30007_8_QuadMAX31856_example.ino
 * Processor/Platform: Arduino Uno R3 (tested)
 * Development Environment: Arduino 1.6.1
 *
@@ -30,6 +30,7 @@
 * REVISION HISTORY:
 * Author		Date	    Comments
 * J. Steinlage		2015Dec30   Baseline Rev, first production support
+* J. Steilnage    2016Aug21   Change functions to support 1shot mode
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -68,10 +69,10 @@
 #include "PlayingWithFusion_MAX31856_STRUCT.h"
 #include "SPI.h"
 
-uint8_t TC0_CS  = 10;
-uint8_t TC1_CS  =  9;
-uint8_t TC2_CS  =  8;
-uint8_t TC3_CS  =  7;
+uint8_t TC0_CS  =  7;
+uint8_t TC1_CS  =  8;
+uint8_t TC2_CS  =  9;
+uint8_t TC3_CS  = 10;
 uint8_t TC0_FAULT = 2;                     // not used in this example, but needed for config setup
 uint8_t TC0_DRDY  = 2;                     // not used in this example, but needed for config setup
 
@@ -79,12 +80,14 @@ PWF_MAX31856  thermocouple0(TC0_CS, TC0_FAULT, TC0_DRDY);
 PWF_MAX31856  thermocouple1(TC1_CS, TC0_FAULT, TC0_DRDY);
 PWF_MAX31856  thermocouple2(TC2_CS, TC0_FAULT, TC0_DRDY);
 PWF_MAX31856  thermocouple3(TC3_CS, TC0_FAULT, TC0_DRDY);
+struct var_max31856 TC_CH0, TC_CH1, TC_CH2, TC_CH3;
 
 void setup()
 {
   delay(1000);                            // give chip a chance to stabilize
   Serial.begin(115200);                   // set baudrate of serial port
   Serial.println("Playing With Fusion: MAX31856, SEN-30007/8");
+  Serial.println("Continous Mode Example");
 
   // setup for the the SPI library:
   SPI.begin();                            // begin SPI
@@ -92,20 +95,18 @@ void setup()
   SPI.setDataMode(SPI_MODE3);             // MAX31856 is a MODE3 device
   
   // call config command... options can be seen in the PlayingWithFusion_MAX31856.h file
-  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
-  thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
-  thermocouple2.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
-  thermocouple3.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
+  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
+  thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
+  thermocouple2.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
+  thermocouple3.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
 }
 
 void loop()
 {
   
   delay(500);                                   // 500ms delay... can be as fast as ~100ms in continuous mode, 1 samp avg
-  
-  static struct var_max31856 TC_CH0, TC_CH1, TC_CH2, TC_CH3;
+
   double tmp;
-  
   struct var_max31856 *tc_ptr;
   
   // Read CH 0
@@ -256,4 +257,3 @@ void loop()
     Serial.println(tmp);
   }
 }
-
