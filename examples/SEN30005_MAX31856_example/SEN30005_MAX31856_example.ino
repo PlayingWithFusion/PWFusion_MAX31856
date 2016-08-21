@@ -77,7 +77,7 @@ void setup()
   SPI.setDataMode(SPI_MODE3);             // MAX31856 is a MODE3 device
   
   // call config command... options can be seen in the PlayingWithFusion_MAX31856.h file
-  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP);
+  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
 }
 
 void loop()
