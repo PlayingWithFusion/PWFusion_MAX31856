@@ -31,6 +31,7 @@
 * Author		Date	    Comments
 * J. Steinlage		2015Dec30   Baseline Rev, first production support
 * J. Steilnage    2016Aug21   Change functions to support 1shot mode
+* J. Steinlage    2017May08   Change display function, always read TC ch even if fault
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -82,6 +83,9 @@ PWF_MAX31856  thermocouple2(TC2_CS, TC0_FAULT, TC0_DRDY);
 PWF_MAX31856  thermocouple3(TC3_CS, TC0_FAULT, TC0_DRDY);
 struct var_max31856 TC_CH0, TC_CH1, TC_CH2, TC_CH3;
 
+// proto for display results function
+void print31856Results(struct var_max31856 *tc_ptr);
+
 void setup()
 {
   delay(1000);                            // give chip a chance to stabilize
@@ -105,154 +109,73 @@ void loop()
 {
   
   delay(500);                                   // 500ms delay... can be as fast as ~100ms in continuous mode, 1 samp avg
-
-  double tmp;
-  struct var_max31856 *tc_ptr;
   
   // Read CH 0
-  tc_ptr = &TC_CH0;                             // set pointer
-  thermocouple0.MAX31856_update(tc_ptr);        // Update MAX31856 channel 0
+  thermocouple0.MAX31856_update(&TC_CH0);        // Update MAX31856 channel 0
   // Read CH 1
-  tc_ptr = &TC_CH1;                             // set pointer
-  thermocouple1.MAX31856_update(tc_ptr);        // Update MAX31856 channel 1
+  thermocouple1.MAX31856_update(&TC_CH1);        // Update MAX31856 channel 1
   // Read CH 2
-  tc_ptr = &TC_CH2;                             // set pointer
-  thermocouple2.MAX31856_update(tc_ptr);        // Update MAX31856 channel 2
+  thermocouple2.MAX31856_update(&TC_CH2);        // Update MAX31856 channel 2
   // Read CH 3
-  tc_ptr = &TC_CH3;                             // set pointer
-  thermocouple3.MAX31856_update(tc_ptr);        // Update MAX31856 channel 3
+  thermocouple3.MAX31856_update(&TC_CH3);        // Update MAX31856 channel 3
   
   
   // ##### Print information to serial port ####
-  
-  // Thermocouple channel 0
   Serial.print("Thermocouple 0: ");            // Print TC0 header
-  if(TC_CH0.status)
-  {
-    // lots of faults possible at once, technically... handle all 8 of them
-    // Faults detected can be masked, please refer to library file to enable faults you want represented
-    Serial.println("fault(s) detected");
-    Serial.print("Fault List: ");
-    if(0x01 & TC_CH0.status){Serial.print("OPEN  ");}
-    if(0x02 & TC_CH0.status){Serial.print("Overvolt/Undervolt  ");}
-    if(0x04 & TC_CH0.status){Serial.print("TC Low  ");}
-    if(0x08 & TC_CH0.status){Serial.print("TC High  ");}
-    if(0x10 & TC_CH0.status){Serial.print("CJ Low  ");}
-    if(0x20 & TC_CH0.status){Serial.print("CJ High  ");}
-    if(0x40 & TC_CH0.status){Serial.print("TC Range  ");}
-    if(0x80 & TC_CH0.status){Serial.print("CJ Range  ");}
-    Serial.println(" ");
-  }
-  else  // no fault, print temperature data
-  {
-    Serial.println("no faults detected");
-    // MAX31856 Internal Temp
-    tmp = (double)TC_CH0.ref_jcn_temp * 0.015625;  // convert fixed pt # to double
-    Serial.print("Tint = ");                      // print internal temp heading
-    if((-100 > tmp) || (150 < tmp)){Serial.println("unknown fault");}
-    else{Serial.println(tmp);}
-    
-    // MAX31856 External (thermocouple) Temp
-    tmp = (double)TC_CH0.lin_tc_temp * 0.0078125;           // convert fixed pt # to double
-    Serial.print("TC Temp = ");                   // print TC temp heading
-    Serial.println(tmp);
-  }
-  
-  // Thermocouple channel 1
+  print31856Results(&TC_CH0);
+
   Serial.print("Thermocouple 1: ");            // Print TC1 header
-  if(TC_CH1.status)
-  {
-    // lots of faults possible at once, technically... handle all 8 of them
-    // Faults detected can be masked, please refer to library file to enable faults you want represented
-    Serial.println("fault(s) detected");
-    Serial.print("Fault List: ");
-    if(0x01 & TC_CH1.status){Serial.print("OPEN  ");}
-    if(0x02 & TC_CH1.status){Serial.print("Overvolt/Undervolt  ");}
-    if(0x04 & TC_CH1.status){Serial.print("TC Low  ");}
-    if(0x08 & TC_CH1.status){Serial.print("TC High  ");}
-    if(0x10 & TC_CH1.status){Serial.print("CJ Low  ");}
-    if(0x20 & TC_CH1.status){Serial.print("CJ High  ");}
-    if(0x40 & TC_CH1.status){Serial.print("TC Range  ");}
-    if(0x80 & TC_CH1.status){Serial.print("CJ Range  ");}
-    Serial.println(" ");
-  }
-  else  // no fault, print temperature data
-  {
-    Serial.println("no faults detected");
-    // MAX31856 Internal Temp
-    tmp = (double)TC_CH1.ref_jcn_temp * 0.015625;  // convert fixed pt # to double
-    Serial.print("Tint = ");                      // print internal temp heading
-    if((-100 > tmp) || (150 < tmp)){Serial.println("unknown fault");}
-    else{Serial.println(tmp);}
-    
-    // MAX31856 External (thermocouple) Temp
-    tmp = (double)TC_CH1.lin_tc_temp * 0.0078125;           // convert fixed pt # to double
-    Serial.print("TC Temp = ");                   // print TC temp heading
-    Serial.println(tmp);
-  }
+  print31856Results(&TC_CH1);
 
-    // Thermocouple channel 2
   Serial.print("Thermocouple 2: ");            // Print TC2 header
-  if(TC_CH2.status)
-  {
-    // lots of faults possible at once, technically... handle all 8 of them
-    // Faults detected can be masked, please refer to library file to enable faults you want represented
-    Serial.println("fault(s) detected");
-    Serial.print("Fault List: ");
-    if(0x01 & TC_CH2.status){Serial.print("OPEN  ");}
-    if(0x02 & TC_CH2.status){Serial.print("Overvolt/Undervolt  ");}
-    if(0x04 & TC_CH2.status){Serial.print("TC Low  ");}
-    if(0x08 & TC_CH2.status){Serial.print("TC High  ");}
-    if(0x10 & TC_CH2.status){Serial.print("CJ Low  ");}
-    if(0x20 & TC_CH2.status){Serial.print("CJ High  ");}
-    if(0x40 & TC_CH2.status){Serial.print("TC Range  ");}
-    if(0x80 & TC_CH2.status){Serial.print("CJ Range  ");}
-    Serial.println(" ");
-  }
-  else  // no fault, print temperature data
-  {
-    Serial.println("no faults detected");
-    // MAX31856 Internal Temp
-    tmp = (double)TC_CH2.ref_jcn_temp * 0.015625;  // convert fixed pt # to double
-    Serial.print("Tint = ");                      // print internal temp heading
-    if((-100 > tmp) || (150 < tmp)){Serial.println("unknown fault");}
-    else{Serial.println(tmp);}
-    
-    // MAX31856 External (thermocouple) Temp
-    tmp = (double)TC_CH2.lin_tc_temp * 0.0078125;           // convert fixed pt # to double
-    Serial.print("TC Temp = ");                   // print TC temp heading
-    Serial.println(tmp);
-  }
+  print31856Results(&TC_CH2);
 
-    // Thermocouple channel 3
   Serial.print("Thermocouple 3: ");            // Print TC3 header
-  if(TC_CH3.status)
+  print31856Results(&TC_CH3);
+}
+
+void print31856Results(struct var_max31856 *tc_ptr)
+{
+  double tmp;
+  if(tc_ptr->status)
   {
     // lots of faults possible at once, technically... handle all 8 of them
     // Faults detected can be masked, please refer to library file to enable faults you want represented
     Serial.println("fault(s) detected");
     Serial.print("Fault List: ");
-    if(0x01 & TC_CH3.status){Serial.print("OPEN  ");}
-    if(0x02 & TC_CH3.status){Serial.print("Overvolt/Undervolt  ");}
-    if(0x04 & TC_CH3.status){Serial.print("TC Low  ");}
-    if(0x08 & TC_CH3.status){Serial.print("TC High  ");}
-    if(0x10 & TC_CH3.status){Serial.print("CJ Low  ");}
-    if(0x20 & TC_CH3.status){Serial.print("CJ High  ");}
-    if(0x40 & TC_CH3.status){Serial.print("TC Range  ");}
-    if(0x80 & TC_CH3.status){Serial.print("CJ Range  ");}
+    if(0x01 & tc_ptr->status){Serial.print("OPEN  ");}
+    if(0x02 & tc_ptr->status){Serial.print("Overvolt/Undervolt  ");}
+    if(0x04 & tc_ptr->status){Serial.print("TC Low  ");}
+    if(0x08 & tc_ptr->status){Serial.print("TC High  ");}
+    if(0x10 & tc_ptr->status){Serial.print("CJ Low  ");}
+    if(0x20 & tc_ptr->status){Serial.print("CJ High  ");}
+    if(0x40 & tc_ptr->status){Serial.print("TC Range  ");}
+    if(0x80 & tc_ptr->status){Serial.print("CJ Range  ");}
     Serial.println(" ");
+    
+    // print internal temp anyway
+    tmp = (double)tc_ptr->ref_jcn_temp * 0.015625;  // convert fixed pt # to double
+    Serial.print("Tint = ");                      // print internal temp heading
+    if((-100 > tmp) || (150 < tmp))
+    {
+      Serial.println("unknown fault");
+    }
+    else
+    {
+      Serial.println(tmp);
+    }
   }
   else  // no fault, print temperature data
   {
     Serial.println("no faults detected");
     // MAX31856 Internal Temp
-    tmp = (double)TC_CH3.ref_jcn_temp * 0.015625;  // convert fixed pt # to double
+    tmp = (double)tc_ptr->ref_jcn_temp * 0.015625;  // convert fixed pt # to double
     Serial.print("Tint = ");                      // print internal temp heading
     if((-100 > tmp) || (150 < tmp)){Serial.println("unknown fault");}
     else{Serial.println(tmp);}
     
     // MAX31856 External (thermocouple) Temp
-    tmp = (double)TC_CH3.lin_tc_temp * 0.0078125;           // convert fixed pt # to double
+    tmp = (double)tc_ptr->lin_tc_temp * 0.0078125;           // convert fixed pt # to double
     Serial.print("TC Temp = ");                   // print TC temp heading
     Serial.println(tmp);
   }
