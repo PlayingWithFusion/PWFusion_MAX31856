@@ -30,6 +30,7 @@
 * REVISION HISTORY:
 * Author			Date		Comments
 * J. Steinlage		2015Aug10   First rev
+* J. Steinlage      2017May08   Read TC ch, even if fault. Fix reg update fcn
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -88,7 +89,7 @@ void PWF_MAX31856::_sing_reg_write(uint8_t RegAdd, uint8_t BitMask, uint8_t RegD
 	// next pack address byte
 	// bits 7:4 are 1000b for read, register is in bits 3:0... format 8Xh
 	SPI.transfer((RegAdd & 0x0F) | 0x80);			// simple write, nothing to read back
-	SPI.transfer(RegData); 							// write register data to IC
+	SPI.transfer(NewRegData); 						// write register data to IC
 	digitalWrite(_cs, HIGH);						// set pin high to end SPI session
 }
 
@@ -162,11 +163,6 @@ void PWF_MAX31856::MAX31856_update(struct var_max31856 *tc_ptr)
 	// faults could potentially be dealt with
 	uint8_t fault_status = _sing_reg_read(REG_SR);
 	tc_ptr->status = fault_status;
-	if(0 != fault_status)
-	{
-		// fault present, exit update
-		return;
-	}// else no fault, keep reading
 	
 	// Read Cold Jcn temperature (2 registers)
 	int16_t cj_temp =  (_sing_reg_read(REG_CJTH)<<8); // MSB, left shift 8
