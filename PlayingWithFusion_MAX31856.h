@@ -41,8 +41,8 @@
 #define PWF_MAX31856_h
 
 #include "Arduino.h"			// use "WProgram.h" for IDE <1.0
-#include "avr/pgmspace.h"
-#include "util/delay.h"
+//#include "avr/pgmspace.h"
+//#include "util/delay.h"
 #include "stdlib.h"
 #include "PlayingWithFusion_MAX31856_STRUCT.h"
 #include "SPI.h"

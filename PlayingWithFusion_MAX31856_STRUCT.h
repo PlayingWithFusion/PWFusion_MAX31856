@@ -40,7 +40,7 @@
 #ifndef PWF_MAX31856_STRUCT_H
 #define PWF_MAX31856_STRUCT_H
 
-#include "avr/pgmspace.h"
+//#include "avr/pgmspace.h"
 
 
 struct var_max31856{
