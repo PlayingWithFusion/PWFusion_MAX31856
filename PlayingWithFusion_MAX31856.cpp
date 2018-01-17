@@ -46,16 +46,12 @@
 ***************************************************************************/
 #include "PlayingWithFusion_MAX31856.h"
 
-PWF_MAX31856::PWF_MAX31856(uint8_t CSx, uint8_t FAULTx, uint8_t DRDYx)
+PWF_MAX31856::PWF_MAX31856(uint8_t CSx)
 {
   // Function to initialize thermocouple channel, load private variables
   _cs = CSx;
-  _fault = FAULTx;
-  _drdy = DRDYx;
   
   pinMode(_cs, OUTPUT);
-  pinMode(_fault, INPUT);
-  pinMode(_drdy, INPUT);
   
   // immediately pull CS pin high to avoid conflicts on SPI bus
   digitalWrite(_cs, HIGH);

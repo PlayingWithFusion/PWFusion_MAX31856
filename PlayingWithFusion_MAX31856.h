@@ -109,7 +109,7 @@
 class PWF_MAX31856
 {
  public:
-  PWF_MAX31856(uint8_t CSx, uint8_t FAULTx, uint8_t DRDYx);
+  PWF_MAX31856(uint8_t CSx);
   void MAX31856_config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE);
   void MAX31856_CJ_offset(int8_t offset_val);	// offset is 2^-4 degC/bit
   void SPIbus_Init(void);
@@ -117,7 +117,7 @@ class PWF_MAX31856
   void MAX31856_1shot_start(void);
 
  private:
-  uint8_t _cs, _fault, _drdy;
+  uint8_t _cs;
   uint8_t _sing_reg_read(uint8_t RegAdd);
   void _sing_reg_write(uint8_t RegAdd, uint8_t BitMask, uint8_t RegData);
 };
