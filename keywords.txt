@@ -5,17 +5,17 @@
 ####################################################
 #   Classes (KEYWORD1)
 ####################################################
-PWF_MAX31856							KEYWORD1
+PWF_MAX31856	KEYWORD1
 
 
 ####################################################
 #   Functions (KEYWORD2)
 ####################################################
-MAX31856_config							KEYWORD2
-MAX31856_CJ_offset						KEYWORD2
-SPIbus_Init								KEYWORD2
-MAX31856_update							KEYWORD2
-MAX31856_1shot_start					KEYWORD2
+MAX31856_config	KEYWORD2
+MAX31856_CJ_offset	KEYWORD2
+SPIbus_Init	KEYWORD2
+MAX31856_update	KEYWORD2
+MAX31856_1shot_start	KEYWORD2
 
 ####################################################
 #   Constants (LITERAL1)
