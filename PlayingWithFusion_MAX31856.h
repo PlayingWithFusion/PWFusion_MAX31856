@@ -1,7 +1,7 @@
 /***************************************************************************
 * File Name: PlayingWithFusion_MAX31856.h
 * Processor/Platform: Arduino Uno R3 (tested)
-* Development Environment: Arduino 1.6.1
+* Development Environment: Arduino 1.8.3
 *
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
 * breakout boards: SEN-30005, SEN-30006 (any TC type)
@@ -30,6 +30,7 @@
 * REVISION HISTORY:
 * Author			Date		Comments
 * J. Steinlage		2015Aug10   First rev
+* J. Steinlage		2018Jul10	Removed DR and FLT pins since nobody uses them
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -109,7 +110,7 @@
 class PWF_MAX31856
 {
  public:
-  PWF_MAX31856(uint8_t CSx, uint8_t FAULTx, uint8_t DRDYx);
+  PWF_MAX31856(uint8_t CSx);
   void MAX31856_config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE);
   void MAX31856_CJ_offset(int8_t offset_val);	// offset is 2^-4 degC/bit
   void SPIbus_Init(void);
