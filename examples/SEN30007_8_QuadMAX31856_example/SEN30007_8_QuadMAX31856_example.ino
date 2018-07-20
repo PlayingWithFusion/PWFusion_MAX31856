@@ -1,12 +1,12 @@
 /***************************************************************************
 * File Name: SEN30007_8_QuadMAX31856_example.ino
 * Processor/Platform: Arduino Uno R3 (tested)
-* Development Environment: Arduino 1.6.1
+* Development Environment: Arduino 1.8.3
 *
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
 * breakout boards: SEN-30007 (any TC type) or SEN-30008 (any TC type)
 *
-* Copyright © 2015 Playing With Fusion, Inc.
+* Copyright © 2015-18 Playing With Fusion, Inc.
 * SOFTWARE LICENSE AGREEMENT: This code is released under the MIT License.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,6 +32,7 @@
 * J. Steinlage		2015Dec30   Baseline Rev, first production support
 * J. Steilnage    2016Aug21   Change functions to support 1shot mode
 * J. Steinlage    2017May08   Change display function, always read TC ch even if fault
+* J. Steinlage    2018Jul10   Removed DR and FLT pins - nobody uses them
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -74,13 +75,11 @@ uint8_t TC0_CS  =  7;
 uint8_t TC1_CS  =  8;
 uint8_t TC2_CS  =  9;
 uint8_t TC3_CS  = 10;
-uint8_t TC0_FAULT = 2;                     // not used in this example, but needed for config setup
-uint8_t TC0_DRDY  = 2;                     // not used in this example, but needed for config setup
 
-PWF_MAX31856  thermocouple0(TC0_CS, TC0_FAULT, TC0_DRDY);
-PWF_MAX31856  thermocouple1(TC1_CS, TC0_FAULT, TC0_DRDY);
-PWF_MAX31856  thermocouple2(TC2_CS, TC0_FAULT, TC0_DRDY);
-PWF_MAX31856  thermocouple3(TC3_CS, TC0_FAULT, TC0_DRDY);
+PWF_MAX31856  thermocouple0(TC0_CS);
+PWF_MAX31856  thermocouple1(TC1_CS);
+PWF_MAX31856  thermocouple2(TC2_CS);
+PWF_MAX31856  thermocouple3(TC3_CS);
 struct var_max31856 TC_CH0, TC_CH1, TC_CH2, TC_CH3;
 
 // proto for display results function
@@ -95,14 +94,14 @@ void setup()
 
   // setup for the the SPI library:
   SPI.begin();                            // begin SPI
-  SPI.setClockDivider(SPI_CLOCK_DIV16);   // SPI speed to SPI_CLOCK_DIV16 (1MHz)
-  SPI.setDataMode(SPI_MODE3);             // MAX31856 is a MODE3 device
+  SPI.setClockDivider(SPI_CLOCK_DIV64);   // SPI speed to SPI_CLOCK_DIV16 (1MHz)
+  SPI.setDataMode(SPI_MODE1);             // MAX31856 is a MODE3 device
   
   // call config command... options can be seen in the PlayingWithFusion_MAX31856.h file
-  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
-  thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
-  thermocouple2.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
-  thermocouple3.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_4SAMP, CMODE_AUTO);
+  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+  thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+  thermocouple2.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+  thermocouple3.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
 }
 
 void loop()
@@ -121,17 +120,42 @@ void loop()
   
   
   // ##### Print information to serial port ####
-  Serial.print("Thermocouple 0: ");            // Print TC0 header
+  Serial.print("TC_0: ");            // Print TC0 header
   print31856Results(&TC_CH0);
+  Serial.println(" ");
 
-  Serial.print("Thermocouple 1: ");            // Print TC1 header
+  Serial.print("TC_1: ");            // Print TC1 header
   print31856Results(&TC_CH1);
+  Serial.println(" ");
 
-  Serial.print("Thermocouple 2: ");            // Print TC2 header
+  Serial.print("TC_2: ");            // Print TC2 header
   print31856Results(&TC_CH2);
+  Serial.println(" ");
 
-  Serial.print("Thermocouple 3: ");            // Print TC3 header
+  Serial.print("TC_3: ");            // Print TC3 header
   print31856Results(&TC_CH3);
+  Serial.println(" ");
+
+  if(TC_CH0.status == 0xFF)
+  {
+    thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+    Serial.println("re-attempt config on TC0");
+  }
+  if(TC_CH1.status == 0xFF)
+  {
+    thermocouple1.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+    Serial.println("re-attempt config on TC1");
+  }
+  if(TC_CH2.status == 0xFF)
+  {
+    thermocouple2.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+    Serial.println("re-attempt config on TC2");
+  }
+  if(TC_CH3.status == 0xFF)
+  {
+    thermocouple3.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+    Serial.println("re-attempt config on TC3");
+  }
 }
 
 void print31856Results(struct var_max31856 *tc_ptr)
@@ -167,16 +191,16 @@ void print31856Results(struct var_max31856 *tc_ptr)
   }
   else  // no fault, print temperature data
   {
-    Serial.println("no faults detected");
+    //Serial.println("no faults detected");
     // MAX31856 Internal Temp
     tmp = (double)tc_ptr->ref_jcn_temp * 0.015625;  // convert fixed pt # to double
     Serial.print("Tint = ");                      // print internal temp heading
     if((-100 > tmp) || (150 < tmp)){Serial.println("unknown fault");}
-    else{Serial.println(tmp);}
+    else{Serial.print(tmp);}
     
     // MAX31856 External (thermocouple) Temp
     tmp = (double)tc_ptr->lin_tc_temp * 0.0078125;           // convert fixed pt # to double
-    Serial.print("TC Temp = ");                   // print TC temp heading
-    Serial.println(tmp);
+    Serial.print(" TC Temp = ");                   // print TC temp heading
+    Serial.print(tmp);
   }
 }
