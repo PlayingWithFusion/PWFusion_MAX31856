@@ -58,16 +58,6 @@ PWF_MAX31856::PWF_MAX31856(uint8_t CSx)
   digitalWrite(_cs, HIGH);
 }
 
-PWF_MAX31856::PWF_MAX31856(uint8_t CSx, uint8_t FAULTx, uint8_t DRDYx)
-    : PWF_MAX31856(CSx)
-{
-   _fault = FAULTx;
-   _drdy = DRDYx;  
-   
-   pinMode(_fault, INPUT);
-   pinMode(_drdy, INPUT);	
-}
-
 uint8_t PWF_MAX31856::_sing_reg_read(uint8_t RegAdd)
 {
 	digitalWrite(_cs, LOW);						// set pin low to start talking to IC

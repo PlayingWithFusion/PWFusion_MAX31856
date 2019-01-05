@@ -40,9 +40,6 @@
 #ifndef PWF_MAX31856_STRUCT_H
 #define PWF_MAX31856_STRUCT_H
 
-//#include "avr/pgmspace.h"
-
-
 struct var_max31856{
     long int  lin_tc_temp;	// linearized TC temperature, 0.0078125 decC/bit (2^-7)
     int16_t  ref_jcn_temp;	// temp of chip ref jcn, 0.015625 deg C/bit (2^-6)
