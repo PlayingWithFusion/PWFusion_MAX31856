@@ -1,7 +1,7 @@
 /***************************************************************************
 * File Name: PlayingWithFusion_MAX31856.cpp
 * Processor/Platform: Arduino Uno R3 (tested)
-* Development Environment: Arduino 1.6.1
+* Development Environment: Arduino 1.8.3
 *
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
 * breakout boards: SEN-30005, SEN-30006 (any TC type)
@@ -31,6 +31,7 @@
 * Author			Date		Comments
 * J. Steinlage		2015Aug10   First rev
 * J. Steinlage      2017May08   Read TC ch, even if fault. Fix reg update fcn
+* J. Steinlage		2018Jul20	Removed DR and FLT pins since nobody uses them
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -209,3 +210,4 @@ void PWF_MAX31856::MAX31856_CJ_offset(int8_t offset_val)	// offset is 2^-4 degC/
 	// might need to write special handling for the signedness of the offset_val...
 	_sing_reg_write(REG_CJTO, 0xFF, (uint8_t) offset_val);
 }
+

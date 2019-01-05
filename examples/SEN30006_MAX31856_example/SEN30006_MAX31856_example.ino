@@ -1,12 +1,12 @@
 /***************************************************************************
 * File Name: SEN30006_MAX31856_example.ino
 * Processor/Platform: Arduino Uno R3 (tested)
-* Development Environment: Arduino 1.6.1
+* Development Environment: Arduino 1.8.3
 *
 * Designed for use with with Playing With Fusion MAX31856 thermocouple
 * breakout boards: SEN-30005 (any TC type) or SEN-30006 (any TC type)
 *
-* Copyright © 2015 Playing With Fusion, Inc.
+* Copyright © 2015-18 Playing With Fusion, Inc.
 * SOFTWARE LICENSE AGREEMENT: This code is released under the MIT License.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
@@ -31,6 +31,7 @@
 * Author		Date	    Comments
 * J. Steinlage		2015Aug10   Baseline Rev, first production support
 * J. Steinlage    2016Aug21   Added support for 1shot mode in .cpp files
+* J. Steinlage    2018Jul10   Removed DR and FLT pins - nobody uses them
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -62,11 +63,9 @@
 
 uint8_t TC0_CS  = 10;
 uint8_t TC1_CS  =  9;
-uint8_t TC0_FAULT = 3;                     // not used in this example, but needed for config setup
-uint8_t TC0_DRDY  = 2;                     // not used in this example, but needed for config setup
 
-PWF_MAX31856  thermocouple0(TC0_CS, TC0_FAULT, TC0_DRDY);
-PWF_MAX31856  thermocouple1(TC1_CS, TC0_FAULT, TC0_DRDY);
+PWF_MAX31856  thermocouple0(TC0_CS);
+PWF_MAX31856  thermocouple1(TC1_CS);
 
 void setup()
 {
@@ -170,4 +169,3 @@ void loop()
     Serial.println(tmp);
   }
 }
-
