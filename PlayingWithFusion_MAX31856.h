@@ -84,10 +84,10 @@
 
 // CR1 Configs
 #define AVG_SEL_1SAMP	0x00
-#define AVG_SEL_2SAMP	0x20
-#define AVG_SEL_4SAMP	0x40
-#define AVG_SEL_8SAMP	0x60
-#define AVG_SEL_16SAMP	0x80
+#define AVG_SEL_2SAMP	0x10
+#define AVG_SEL_4SAMP	0x20
+#define AVG_SEL_8SAMP	0x30
+#define AVG_SEL_16SAMP	0x40
 #define B_TYPE			0x00
 #define E_TYPE			0x01
 #define J_TYPE			0x02
