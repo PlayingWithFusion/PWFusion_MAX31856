@@ -55,77 +55,80 @@
 *    5V            5V            -->  Vin (supply with same voltage as Arduino I/O, 5V)
 *     NOT CONNECTED              --> 3.3V (this is 3.3V output from on-board LDO. DO NOT POWER THIS PIN!
 ***************************************************************************/
-#include "PlayingWithFusion_MAX31856.h"
-#include "PlayingWithFusion_MAX31856_STRUCT.h"
-#include "SPI.h"
+#include <PWFusion_MAX31856.h>
 
 uint8_t TC0_CS  = 10;
 
-PWF_MAX31856  thermocouple0(TC0_CS);
+MAX31856  thermocouple0;
 
 void setup()
 {
-  delay(1000);                            // give chip a chance to stabilize
-  Serial.begin(115200);                   // set baudrate of serial port
-  Serial.println("Playing With Fusion: MAX31856, SEN-30005");
+  // Give the MAX31856 a chance to stabilize
+  delay(1000);  
 
-  // setup for the the SPI library:
-  SPI.begin();                            // begin SPI
-  SPI.setClockDivider(SPI_CLOCK_DIV16);   // SPI speed to SPI_CLOCK_DIV16 (1MHz)
-  SPI.setDataMode(SPI_MODE3);             // MAX31856 is a MODE3 device
-  
-  // call config command... options can be seen in the PlayingWithFusion_MAX31856.h file
-  thermocouple0.MAX31856_config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
+  Serial.begin(115200);  // set baudrate of serial port
+  Serial.println(F("Playing With Fusion: MAX31856, SEN-30005"));
+
+  // call config command... options can be seen in the PWFusion_MAX31856.h file
+  thermocouple0.begin(TC0_CS);
+  thermocouple0.config(K_TYPE, CUTOFF_60HZ, AVG_SEL_1SAMP, CMODE_AUTO);
 }
+
 
 void loop()
 {
+  delay(150);  // 150ms delay... can be as fast as ~100ms in continuous mode, 1 samp avg
+
+  // Get latest measurement from MAX31856 channel 0
+  thermocouple0.sample();
   
-  delay(150);                                   // 500ms delay... can be as fast as ~100ms in continuous mode, 1 samp avg
-  
-  static struct var_max31856 TC_CH0;
-  double tmp;
-  
-  struct var_max31856 *tc_ptr;
-  
-  // Read CH 0
-  tc_ptr = &TC_CH0;                             // set pointer
-  thermocouple0.MAX31856_update(tc_ptr);        // Update MAX31856 channel 0
-  
-  
-  // ##### Print information to serial port ####
-  
-  // Thermocouple channel 0
-  Serial.print("Thermocouple 0: ");            // Print TC0 header
-  if(TC_CH0.status)
+  // Print information to serial port
+  print31856Results(0, thermocouple0);
+  Serial.println();
+}
+
+
+void print31856Results(uint8_t channel, MAX31856 &tc)
+{
+  uint8_t status = tc.getStatus();
+
+  Serial.print("Thermocouple ");
+  Serial.print(channel);
+
+  if(status)
   {
     // lots of faults possible at once, technically... handle all 8 of them
     // Faults detected can be masked, please refer to library file to enable faults you want represented
-    Serial.println("fault(s) detected");
-    Serial.print("Fault List: ");
-    if(0x01 & TC_CH0.status){Serial.print("OPEN  ");}
-    if(0x02 & TC_CH0.status){Serial.print("Overvolt/Undervolt  ");}
-    if(0x04 & TC_CH0.status){Serial.print("TC Low  ");}
-    if(0x08 & TC_CH0.status){Serial.print("TC High  ");}
-    if(0x10 & TC_CH0.status){Serial.print("CJ Low  ");}
-    if(0x20 & TC_CH0.status){Serial.print("CJ High  ");}
-    if(0x40 & TC_CH0.status){Serial.print("TC Range  ");}
-    if(0x80 & TC_CH0.status){Serial.print("CJ Range  ");}
-    Serial.println(" ");
+    Serial.print(F(": FAULTED - "));
+    if(TC_FAULT_OPEN & status)        { Serial.print(F("OPEN, ")); }
+    if(TC_FAULT_VOLTAGE_OOR & status) { Serial.print(F("Overvolt/Undervolt, ")); }
+    if(TC_FAULT_TC_TEMP_LOW & status) { Serial.print(F("TC Low, ")); }
+    if(TC_FAULT_TC_TEMP_HIGH & status){ Serial.print(F("TC High, ")); }
+    if(TC_FAULT_CJ_TEMP_LOW & status) { Serial.print(F("CJ Low, ")); }
+    if(TC_FAULT_CJ_TEMP_HIGH & status){ Serial.print(F("CJ High, ")); }
+    if(TC_FAULT_TC_OOR & status)      { Serial.print(F("TC Range, ")); }
+    if(TC_FAULT_CJ_OOR & status)      { Serial.print(F("CJ Range, ")); }
+    Serial.println();
   }
   else  // no fault, print temperature data
   {
-    Serial.println("no faults detected");
-    // MAX31856 Internal Temp
-    tmp = (double)TC_CH0.ref_jcn_temp * 0.015625;  // convert fixed pt # to double
-    Serial.print("Tint = ");                      // print internal temp heading
-    if((-100 > tmp) || (150 < tmp)){Serial.println("unknown fault");}
-    else{Serial.println(tmp);}
+    Serial.println(F(": Good"));
     
     // MAX31856 External (thermocouple) Temp
-    tmp = (double)TC_CH0.lin_tc_temp * 0.0078125;           // convert fixed pt # to double
-    Serial.print("TC Temp = ");                   // print TC temp heading
-    Serial.println(tmp);
+    Serial.print(F("TC Temp = "));                   // print TC temp heading
+    Serial.println(tc.getTemperature());
   }
 
+  // MAX31856 Internal Temp
+  Serial.print(F("Tint = "));
+  float cjTemp = tc.getColdJunctionTemperature();
+  if ((cjTemp > -100) && (cjTemp < 150))
+  {
+    Serial.println(cjTemp);
+  }
+  else
+  {
+    Serial.println(F("Unknown fault with cold junction measurement"));
+  }
+  Serial.println();
 }
