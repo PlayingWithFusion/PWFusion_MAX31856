@@ -143,6 +143,7 @@ class MAX31856
   uint8_t _cs;
   SPIClass *_spiPort;
   SPISettings _spiSettings;
+  SPISettings _spiSettingsJunk;
 
   int32_t rawTCTemp;  // linearized TC temperature, 0.0078125 decC/bit (2^-7)
   int16_t rawCJTemp;  // temp of chip ref jcn, 0.015625 deg C/bit (2^-6)

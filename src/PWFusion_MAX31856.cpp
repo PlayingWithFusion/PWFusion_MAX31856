@@ -48,7 +48,8 @@
 #include "PWFusion_MAX31856.h"
 
 MAX31856::MAX31856() :
-   _spiSettings(5000000, MSBFIRST, SPI_MODE3)
+   _spiSettings(5000000, MSBFIRST, SPI_MODE1),
+   _spiSettingsJunk(1000000, MSBFIRST, SPI_MODE1)
 {
 }
 
@@ -65,6 +66,12 @@ void MAX31856::begin(int8_t chipSelectPin, SPIClass &spiPort)
   digitalWrite(_cs, HIGH);
 
    _spiPort->begin();
+
+   // Workaround for Uno R4.  Set SPI configuration to 'something' different so
+   // that the next time beginTransaction(_spiSettings) is called for real the R4's
+   // SPI driver is forced to change SPI settings
+   _spiPort->beginTransaction(_spiSettingsJunk);
+   _spiPort->endTransaction(); 
 }
 
 
