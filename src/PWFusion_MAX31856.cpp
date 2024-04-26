@@ -32,6 +32,7 @@
 * J. Steinlage      2015Aug10   First rev
 * J. Steinlage      2017May08   Read TC ch, even if fault. Fix reg update fcn
 * J. Steinlage      2018Jul20   Removed DR and FLT pins since nobody uses them
+* J. Leonard        2024Apr25   Initialized TC and CJ fault threshold registers
 *
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
@@ -140,8 +141,7 @@ void MAX31856::config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint
       [3:0] TC type (0=B, 1=E, 2=J, 3=K(default), 4=N, 5=R, 6=S, 7=T, others, see datasheet)*/
    
    // set MASK (REG_MASK) - PWF default masks all but OV/UV and OPEN from lighting LED
-   regdat = readByte(REG_MASK) & 0x3F;
-   regdat |= (CJ_HIGH_MASK | CJ_LOW_MASK | TC_HIGH_MASK | TC_LOW_MASK); 
+   regdat = (CJ_HIGH_MASK | CJ_LOW_MASK | TC_HIGH_MASK | TC_LOW_MASK); 
    writeByte(REG_MASK, regdat);
 /*   MASK, 02h/82h: This register masks faults from causing the FAULT output from asserting,
                but fault bits will still be set in the FSR (0x0F)
@@ -160,6 +160,8 @@ void MAX31856::config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint
    //       limits have been exceeded for your specific measurement configuration
 /*   CJHFT, 03h/83h: cold-jcn high fault threshold, default 0x7F (bit 7 is sign)
    CJLFT, 04h/84h: cold-jcn low fault threshold, default 0x00) */
+   writeByte(REG_CJHF, 0x7F);
+   writeByte(REG_CJLF, 0x00);
 
    // LEAVE LTXFTX AT DEFAULT VALUES FOR PWF EXAMPLE
    // note: these values would potentially be used to indicate material limits 
@@ -168,6 +170,10 @@ void MAX31856::config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint
    LTHFTL, 06h/86h: Linearize temperature high fault thresh LSB
    LTLFTH, 07h/87h: Linearize temperature low fault thresh MSB (bit 7 is sign)
    LTLFTL, 08h/88h: Linearize temperature low fault thresh LSB */
+   writeByte(REG_LTHFTH, 0x7F);
+   writeByte(REG_LTHFTL, 0xFF);
+   writeByte(REG_LTLFTH, 0xFF);
+   writeByte(REG_LTLFTL, 0x80);
 }
 
 
