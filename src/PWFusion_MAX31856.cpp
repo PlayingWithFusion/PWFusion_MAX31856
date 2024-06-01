@@ -106,17 +106,17 @@ void MAX31856::writeByte(Max31856_Reg reg, uint8_t value)
 }
 
 
-void MAX31856::config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE)
+void MAX31856::config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max31856_Conversion_Mode MEAS_MODE)
 {
    // TC_TYPE: B_TYPE, E_TYPE, J_TYPE, K_TYPE, N_TYPE, R_TYPE, S_TYPE, T_TYPE
    // FILT_FREQ: CUTOFF_60HZ, CUTOFF_50HZ
    // AVG_MODE: AVG_SEL_1SAMP, AVG_SEL_2SAMP, AVG_SEL_4SAMP, AVG_SEL_8SAMP, AVG_SEL_16SAMP
-   // MEAS_MODE: CMODE_OFF, CMODE_AUTO
+   // MEAS_MODE: CONV_AUTO, CONV_SINGL
    
    uint8_t regdat = 0;      // set up paramater to compile register configs
    
    // set CR0 (REG_CR0)
-   if(CMODE_AUTO == MEAS_MODE) // auto conversion mode selected (~100ms interval sampling)
+   if(MEAS_MODE == CONV_AUTO) // auto conversion mode selected (~100ms interval sampling)
    {
       regdat = (CMODE_AUTO | ONESHOT_OFF | OCFAULT_10MS | CJ_ENABLED | FAULT_AUTO | FAULT_CLR_DEF | FILT_FREQ);
    }

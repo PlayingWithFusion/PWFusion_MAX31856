@@ -66,6 +66,22 @@ typedef enum Max31856_Reg_e {
   REG_SR      = 0x0F  // Status Register
 } Max31856_Reg;
 
+typedef enum {
+  CONV_AUTO,          // Auto (continuous) conversion mode (fast)
+  CONV_SINGL,         // Single shot conversion mode (slower)
+} Max31856_Conversion_Mode;
+
+typedef enum {
+  TYPE_B,
+  TYPE_E,
+  TYPE_J,
+  TYPE_K,
+  TYPE_N,
+  TYPE_R,
+  TYPE_S,
+  TYPE_T,
+} Tc_Type;
+
 
 // CR0 Configs
 #define CMODE_OFF       0x00
@@ -126,7 +142,7 @@ class MAX31856
   void begin(int8_t chipSelectPin, SPIClass &spiPort = SPI);
   void sample();
 
-  void config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE);
+  void config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max31856_Conversion_Mode MEAS_MODE);
   void startOneShotMeasurement();
   void setColdJunctionOffset(float offsetDegC);
 
