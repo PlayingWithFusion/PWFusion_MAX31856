@@ -48,6 +48,14 @@
 ***************************************************************************/
 #include "PWFusion_MAX31856.h"
 
+// PRIVATE FUNCTIONS
+
+static int16_t smtotc_16(int16_t x);
+
+static int32_t smtotc_32(int32_t x);
+
+// MAX31856 CLASS FUNCITONS
+
 MAX31856::MAX31856() :
    _spiSettings(5000000, MSBFIRST, SPI_MODE1),
    _spiSettingsJunk(1000000, MSBFIRST, SPI_MODE1)
@@ -179,22 +187,29 @@ void MAX31856::config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max3
 
 void MAX31856::sample()
 {
+   uint16_t rawCJReg;
+   uint32_t rawTCReg;
+   int16_t m;
    // Start by reading SR for any faults, exit if faults present, though some
    // faults could potentially be dealt with
    status = readByte(REG_SR);
    
    // Read Cold Jcn temperature (2 registers)
-   rawCJTemp  = (int16_t)(uint16_t)readByte(REG_CJTH) << 8; // MSB, left shift 8
-   rawCJTemp |= (int16_t)(uint16_t)readByte(REG_CJTL);              // LSB read
-   // now save sign, shift right 2 to align to type (see datasheet, pg 24 for reg packing)
-	rawCJTemp >>= 2;
+   rawCJReg  = (int16_t)(uint16_t)readByte(REG_CJTH) << 8; // MSB, left shift 8
+   rawCJReg |= (int16_t)(uint16_t)readByte(REG_CJTL);              // LSB read
+
+   // convert to 16-bit sign-magnitude value
+   rawCJReg = (rawCJReg >> 2) & 0b1001111111111111;
+   rawCJTemp = smtotc_16(rawCJReg);
    
    // Read Linearized TC temperature (3 registers)
-   rawTCTemp  = (int32_t)(uint32_t)readByte(REG_LTCBH) << 24;   // MSB, left shift by 3 bytes
-   rawTCTemp |= (int32_t)(uint32_t)readByte(REG_LTCBM) << 16;
-   rawTCTemp |= (int32_t)(uint32_t)readByte(REG_LTCBL) << 8;    // LSB, still shifted left by one byte
-   // now save sign, shift to align to type (see datasheet, pg 25 for reg packing)
-   rawTCTemp >>= 13;
+   rawTCReg  = (int32_t)(uint32_t)readByte(REG_LTCBH) << 24;   // MSB, left shift by 3 bytes
+   rawTCReg |= (int32_t)(uint32_t)readByte(REG_LTCBM) << 16;
+   rawTCReg |= (int32_t)(uint32_t)readByte(REG_LTCBL) << 8;    // LSB, still shifted left by one byte
+
+   // Convert to 32-bit sign-magnitude value
+   rawTCReg = (rawTCReg >> 13) & 0b10000000000000111111111111111111;
+   rawTCTemp = smtotc_32(rawTCReg);
 }
 
 
@@ -242,4 +257,18 @@ float MAX31856::getColdJunctionTemperature()
 uint8_t MAX31856::getStatus()
 {
 	return status;
+}
+
+// PRIVATE FUNCTION DEFINITIONS
+
+int16_t smtotc_16(int16_t x)
+{
+   int16_t m = x >> 15;
+   return (~m & x) | (((x & 0x8000) - x) & m);
+}
+
+int32_t smtotc_32(int32_t x)
+{
+   int16_t m = x >> 31;
+   return (~m & x) | (((x & 0x80000000) - x) & m);
 }
