@@ -71,17 +71,6 @@ typedef enum {
   CONV_SINGL,         // Single shot conversion mode (slower)
 } Max31856_Conversion_Mode;
 
-typedef enum {
-  TYPE_B,
-  TYPE_E,
-  TYPE_J,
-  TYPE_K,
-  TYPE_N,
-  TYPE_R,
-  TYPE_S,
-  TYPE_T,
-} Tc_Type;
-
 
 // CR0 Configs
 #define CMODE_OFF       0x00
@@ -134,6 +123,17 @@ typedef enum {
 #define TC_FAULT_VOLTAGE_OOR  0x02
 #define TC_FAULT_OPEN         0x01
 
+
+typedef enum {
+  TYPE_B = B_TYPE,
+  TYPE_E = E_TYPE,
+  TYPE_J = J_TYPE,
+  TYPE_K = K_TYPE,
+  TYPE_N = N_TYPE,
+  TYPE_R = R_TYPE,
+  TYPE_S = S_TYPE,
+  TYPE_T = T_TYPE,
+} Tc_Type;
 
 class MAX31856
 {
