@@ -189,7 +189,6 @@ void MAX31856::sample()
 {
    uint16_t rawCJReg;
    uint32_t rawTCReg;
-   int16_t m;
    // Start by reading SR for any faults, exit if faults present, though some
    // faults could potentially be dealt with
    status = readByte(REG_SR);
