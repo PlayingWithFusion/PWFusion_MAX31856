@@ -169,11 +169,14 @@ void MAX31856::config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max3
 /*   LTHFTH, 05h/85h: Linearize temperature high fault thresh MSB (bit 7 is sign)
    LTHFTL, 06h/86h: Linearize temperature high fault thresh LSB
    LTLFTH, 07h/87h: Linearize temperature low fault thresh MSB (bit 7 is sign)
-   LTLFTL, 08h/88h: Linearize temperature low fault thresh LSB */
+   LTLFTL, 08h/88h: Linearize temperature low fault thresh LSB 
+   CJTO, 09h/89h: Cold Junction Temperature Offset*/
    writeByte(REG_LTHFTH, 0x7F);
    writeByte(REG_LTHFTL, 0xFF);
    writeByte(REG_LTLFTH, 0xFF);
    writeByte(REG_LTLFTL, 0x80);
+   // Explicitly set cold-junction offset to zero
+   writeByte(REG_CJTO, 0x00);
 }
 
 
