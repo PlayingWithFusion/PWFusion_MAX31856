@@ -48,6 +48,8 @@
 ***************************************************************************/
 #include "PWFusion_MAX31856.h"
 
+// MAX31856 CLASS FUNCITONS
+
 MAX31856::MAX31856() :
    _spiSettings(5000000, MSBFIRST, SPI_MODE1),
    _spiSettingsJunk(1000000, MSBFIRST, SPI_MODE1)
@@ -182,22 +184,48 @@ void MAX31856::config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max3
 
 void MAX31856::sample()
 {
+   uint16_t rawCJReg;
+   uint32_t rawTCReg;
    // Start by reading SR for any faults, exit if faults present, though some
    // faults could potentially be dealt with
    status = readByte(REG_SR);
    
    // Read Cold Jcn temperature (2 registers)
-   rawCJTemp  = (int16_t)(uint16_t)readByte(REG_CJTH) << 8; // MSB, left shift 8
-   rawCJTemp |= (int16_t)(uint16_t)readByte(REG_CJTL);              // LSB read
-   // now save sign, shift right 2 to align to type (see datasheet, pg 24 for reg packing)
-	rawCJTemp >>= 2;
+   rawCJReg  = (uint16_t)readByte(REG_CJTH) << 8; // MSB, left shift 8
+   rawCJReg |= (uint16_t)readByte(REG_CJTL);              // LSB read
+
+   // convert sign-magnitude value to 2's complement.   If bit 0x2000 is set this is a negative number, 
+   // convert all the bits to the right of the sign bit to 2s complement
+   // Shift to align with memory
+   rawCJReg >>= 2;
+   if (rawCJReg & 0x2000)
+   {
+      rawCJTemp = (int16_t)(-(rawCJReg & 0x1FFF));
+   }
+   else
+   {
+      rawCJTemp = (int16_t)(rawCJReg & 0x1FFF);
+   }
    
    // Read Linearized TC temperature (3 registers)
-   rawTCTemp  = (int32_t)(uint32_t)readByte(REG_LTCBH) << 24;   // MSB, left shift by 3 bytes
-   rawTCTemp |= (int32_t)(uint32_t)readByte(REG_LTCBM) << 16;
-   rawTCTemp |= (int32_t)(uint32_t)readByte(REG_LTCBL) << 8;    // LSB, still shifted left by one byte
-   // now save sign, shift to align to type (see datasheet, pg 25 for reg packing)
-   rawTCTemp >>= 13;
+   rawTCReg  = (uint32_t)readByte(REG_LTCBH) << 24;   // MSB, left shift by 3 bytes
+   rawTCReg |= (uint32_t)readByte(REG_LTCBM) << 16;
+   rawTCReg |= (uint32_t)readByte(REG_LTCBL) << 8;    // LSB, still shifted left by one byte
+
+   // convert sign-magnitude value to 2's complement.   If bit 0x40000 is set this is a negative number, 
+   // convert all the bits to the right of the sign bit to 2s complement
+   // Shift to align with memory
+   rawTCReg >>= 13;
+   if (rawTCReg & 0x40000)
+   {
+      // Negative
+      rawTCTemp = (int32_t)(-(rawTCReg & 0x3FFFF));
+   }
+   else
+   {
+      // Positive
+      rawTCTemp = (int32_t)(rawTCReg & 0x3FFFF);
+   }
 }
 
 
