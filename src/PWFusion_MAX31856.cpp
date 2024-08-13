@@ -48,12 +48,6 @@
 ***************************************************************************/
 #include "PWFusion_MAX31856.h"
 
-// PRIVATE FUNCTIONS
-
-static int16_t smtotc_16(int16_t x);
-
-static int32_t smtotc_32(int32_t x);
-
 // MAX31856 CLASS FUNCITONS
 
 MAX31856::MAX31856() :
@@ -194,21 +188,41 @@ void MAX31856::sample()
    status = readByte(REG_SR);
    
    // Read Cold Jcn temperature (2 registers)
-   rawCJReg  = (int16_t)(uint16_t)readByte(REG_CJTH) << 8; // MSB, left shift 8
-   rawCJReg |= (int16_t)(uint16_t)readByte(REG_CJTL);              // LSB read
+   rawCJReg  = (uint16_t)readByte(REG_CJTH) << 8; // MSB, left shift 8
+   rawCJReg |= (uint16_t)readByte(REG_CJTL);              // LSB read
 
-   // convert to 16-bit sign-magnitude value
-   rawCJReg = (rawCJReg >> 2) & 0b1001111111111111;
-   rawCJTemp = smtotc_16(rawCJReg);
+   // convert sign-magnitude value to 2's complement.   If bit 0x2000 is set this is a negative number, 
+   // convert all the bits to the right of the sign bit to 2s complement
+   // Shift to align with memory
+   rawCJReg >>= 2;
+   if (rawCJReg & 0x2000)
+   {
+      rawCJTemp = (int16_t)(-(rawCJReg & 0x1FFF));
+   }
+   else
+   {
+      rawCJTemp = (int16_t)(rawCJReg & 0x1FFF);
+   }
    
    // Read Linearized TC temperature (3 registers)
-   rawTCReg  = (int32_t)(uint32_t)readByte(REG_LTCBH) << 24;   // MSB, left shift by 3 bytes
-   rawTCReg |= (int32_t)(uint32_t)readByte(REG_LTCBM) << 16;
-   rawTCReg |= (int32_t)(uint32_t)readByte(REG_LTCBL) << 8;    // LSB, still shifted left by one byte
+   rawTCReg  = (uint32_t)readByte(REG_LTCBH) << 24;   // MSB, left shift by 3 bytes
+   rawTCReg |= (uint32_t)readByte(REG_LTCBM) << 16;
+   rawTCReg |= (uint32_t)readByte(REG_LTCBL) << 8;    // LSB, still shifted left by one byte
 
-   // Convert to 32-bit sign-magnitude value
-   rawTCReg = (rawTCReg >> 13) & 0b10000000000000111111111111111111;
-   rawTCTemp = smtotc_32(rawTCReg);
+   // convert sign-magnitude value to 2's complement.   If bit 0x40000 is set this is a negative number, 
+   // convert all the bits to the right of the sign bit to 2s complement
+   // Shift to align with memory
+   rawTCReg >>= 13;
+   if (rawTCReg & 0x40000)
+   {
+      // Negative
+      rawTCTemp = (int32_t)(-(rawTCReg & 0x3FFFF));
+   }
+   else
+   {
+      // Positive
+      rawTCTemp = (int32_t)(rawTCReg & 0x3FFFF);
+   }
 }
 
 
@@ -256,18 +270,4 @@ float MAX31856::getColdJunctionTemperature()
 uint8_t MAX31856::getStatus()
 {
 	return status;
-}
-
-// PRIVATE FUNCTION DEFINITIONS
-
-int16_t smtotc_16(int16_t x)
-{
-   int16_t m = x >> 15;
-   return (~m & x) | (((x & 0x8000) - x) & m);
-}
-
-int32_t smtotc_32(int32_t x)
-{
-   int16_t m = x >> 31;
-   return (~m & x) | (((x & 0x80000000) - x) & m);
 }
