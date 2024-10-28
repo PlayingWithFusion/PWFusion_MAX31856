@@ -66,12 +66,6 @@ typedef enum Max31856_Reg_e {
   REG_SR      = 0x0F  // Status Register
 } Max31856_Reg;
 
-typedef enum {
-  CONV_AUTO,          // Auto (continuous) conversion mode (fast)
-  CONV_SINGL,         // Single shot conversion mode (slower)
-} Max31856_Conversion_Mode;
-
-
 // CR0 Configs
 #define CMODE_OFF       0x00
 #define CMODE_AUTO      0x80
@@ -123,6 +117,10 @@ typedef enum {
 #define TC_FAULT_VOLTAGE_OOR  0x02
 #define TC_FAULT_OPEN         0x01
 
+typedef enum {
+  CONV_AUTO = CMODE_AUTO,          // Auto (continuous) conversion mode (fast)
+  CONV_SINGL,         // Single shot conversion mode (slower)
+} Max31856_Conversion_Mode;
 
 typedef enum {
   TYPE_B = B_TYPE,
