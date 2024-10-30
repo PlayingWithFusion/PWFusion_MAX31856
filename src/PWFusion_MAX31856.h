@@ -48,22 +48,22 @@
 
 // Registers
 typedef enum Max31856_Reg_e {
-  REG_CR0     = 0x00, // Config Reg 0 - See Datasheet, pg 19
-  REG_CR1     = 0x01, // Config Reg 1 - averaging and TC type
-  REG_MASK    = 0x02, // Fault mask register (for fault pin)
-  REG_CJHF    = 0x03, // Cold Jcn high fault threshold, 1 degC/bit
-  REG_CJLF    = 0x04, // Cold Jcn low fault threshold, 1 degC/bit
-  REG_LTHFTH  = 0x05, // TC temp high fault threshold, MSB, 0.0625 degC/bit
-  REG_LTHFTL  = 0x06, // TC temp high fault threshold, LSB
-  REG_LTLFTH  = 0x07, // TC temp low fault threshold, MSB, 0.0625 degC/bit
-  REG_LTLFTL  = 0x08, // TC temp low fault threshold, LSB
-  REG_CJTO    = 0x09, // Cold Jcn Temp Offset Reg, 0.0625 degC/bit
-  REG_CJTH    = 0x0A, // Cold Jcn Temp Reg, MSB, 0.015625 deg C/bit (2^-6)
-  REG_CJTL    = 0x0B, // Cold Jcn Temp Reg, LSB
-  REG_LTCBH   = 0x0C, // Linearized TC Temp, Byte 2, 0.0078125 decC/bit
-  REG_LTCBM   = 0x0D, // Linearized TC Temp, Byte 1
-  REG_LTCBL   = 0x0E, // Linearized TC Temp, Byte 0
-  REG_SR      = 0x0F  // Status Register
+   REG_CR0     = 0x00, // Config Reg 0 - See Datasheet, pg 19
+   REG_CR1     = 0x01, // Config Reg 1 - averaging and TC type
+   REG_MASK    = 0x02, // Fault mask register (for fault pin)
+   REG_CJHF    = 0x03, // Cold Jcn high fault threshold, 1 degC/bit
+   REG_CJLF    = 0x04, // Cold Jcn low fault threshold, 1 degC/bit
+   REG_LTHFTH  = 0x05, // TC temp high fault threshold, MSB, 0.0625 degC/bit
+   REG_LTHFTL  = 0x06, // TC temp high fault threshold, LSB
+   REG_LTLFTH  = 0x07, // TC temp low fault threshold, MSB, 0.0625 degC/bit
+   REG_LTLFTL  = 0x08, // TC temp low fault threshold, LSB
+   REG_CJTO    = 0x09, // Cold Jcn Temp Offset Reg, 0.0625 degC/bit
+   REG_CJTH    = 0x0A, // Cold Jcn Temp Reg, MSB, 0.015625 deg C/bit (2^-6)
+   REG_CJTL    = 0x0B, // Cold Jcn Temp Reg, LSB
+   REG_LTCBH   = 0x0C, // Linearized TC Temp, Byte 2, 0.0078125 decC/bit
+   REG_LTCBM   = 0x0D, // Linearized TC Temp, Byte 1
+   REG_LTCBL   = 0x0E, // Linearized TC Temp, Byte 0
+   REG_SR      = 0x0F  // Status Register
 } Max31856_Reg;
 
 // CR0 Configs
@@ -118,50 +118,51 @@ typedef enum Max31856_Reg_e {
 #define TC_FAULT_OPEN         0x01
 
 typedef enum {
-  CONV_AUTO = CMODE_AUTO,          // Auto (continuous) conversion mode (fast)
-  CONV_SINGL,         // Single shot conversion mode (slower)
+   CONV_AUTO = CMODE_AUTO,          // Auto (continuous) conversion mode (fast)
+   CONV_SINGL,                      // Single shot conversion mode (slower)
 } Max31856_Conversion_Mode;
 
 typedef enum {
-  TYPE_B = B_TYPE,
-  TYPE_E = E_TYPE,
-  TYPE_J = J_TYPE,
-  TYPE_K = K_TYPE,
-  TYPE_N = N_TYPE,
-  TYPE_R = R_TYPE,
-  TYPE_S = S_TYPE,
-  TYPE_T = T_TYPE,
+   TYPE_B = B_TYPE,
+   TYPE_E = E_TYPE,
+   TYPE_J = J_TYPE,
+   TYPE_K = K_TYPE,
+   TYPE_N = N_TYPE,
+   TYPE_R = R_TYPE,
+   TYPE_S = S_TYPE,
+   TYPE_T = T_TYPE,
 } Tc_Type;
 
 class MAX31856
 {
- public:
-  MAX31856();
-  void begin(int8_t chipSelectPin, SPIClass &spiPort = SPI);
-  void sample();
+   public:
+      MAX31856();
+      void begin(int8_t chipSelectPin, SPIClass &spiPort = SPI);
+      void sample();
 
-  void config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max31856_Conversion_Mode MEAS_MODE);
-  void startOneShotMeasurement();
-  void setColdJunctionOffset(float offsetDegC);
+      void config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE);
+      void config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max31856_Conversion_Mode MEAS_MODE);
+      void startOneShotMeasurement();
+      void setColdJunctionOffset(float offsetDegC);
 
-  float getTemperature();
-  float getColdJunctionTemperature();
-  uint8_t getStatus();
+      float getTemperature();
+      float getColdJunctionTemperature();
+      uint8_t getStatus();
 
-  void writeByte(Max31856_Reg reg, uint8_t value);
-  uint8_t readByte(Max31856_Reg reg);
+      void writeByte(Max31856_Reg reg, uint8_t value);
+      uint8_t readByte(Max31856_Reg reg);
 
- private:
-  //void writeConfig();
+   private:
+      //void writeConfig();
 
-  uint8_t _cs;
-  SPIClass *_spiPort;
-  SPISettings _spiSettings;
-  SPISettings _spiSettingsJunk;
-
-  int32_t rawTCTemp;  // linearized TC temperature, 0.0078125 decC/bit (2^-7)
-  int16_t rawCJTemp;  // temp of chip ref jcn, 0.015625 deg C/bit (2^-6)
-  uint8_t status;     // TC status - valid/invalid + fault reason
+      uint8_t _cs;
+      SPIClass *_spiPort;
+      SPISettings _spiSettings;
+      SPISettings _spiSettingsJunk;
+    
+      int32_t rawTCTemp;  // linearized TC temperature, 0.0078125 decC/bit (2^-7)
+      int16_t rawCJTemp;  // temp of chip ref jcn, 0.015625 deg C/bit (2^-6)
+      uint8_t status;     // TC status - valid/invalid + fault reason
 };
 
 #endif // PWFUSION_MAX31856_H

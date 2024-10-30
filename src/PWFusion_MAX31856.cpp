@@ -59,14 +59,14 @@ MAX31856::MAX31856() :
 
 void MAX31856::begin(int8_t chipSelectPin, SPIClass &spiPort)
 {
-  // Function to initialize thermocouple channel, load private variables
-  _cs = chipSelectPin;
-  _spiPort = &spiPort;
-  
-  pinMode(_cs, OUTPUT);
-  
-  // immediately pull CS pin high to avoid conflicts on SPI bus
-  digitalWrite(_cs, HIGH);
+   // Function to initialize thermocouple channel, load private variables
+   _cs = chipSelectPin;
+   _spiPort = &spiPort;
+
+   pinMode(_cs, OUTPUT);
+
+   // immediately pull CS pin high to avoid conflicts on SPI bus
+   digitalWrite(_cs, HIGH);
 
    _spiPort->begin();
 
@@ -80,35 +80,41 @@ void MAX31856::begin(int8_t chipSelectPin, SPIClass &spiPort)
 
 uint8_t MAX31856::readByte(Max31856_Reg reg)
 {
-  uint8_t result;
+   uint8_t result;
 
-  _spiPort->beginTransaction(_spiSettings);  
-  digitalWrite(_cs, LOW);           // set pin low to start talking to IC
+   _spiPort->beginTransaction(_spiSettings);  
+   digitalWrite(_cs, LOW);           // set pin low to start talking to IC
 
-  _spiPort->transfer(reg);            // write address
-  result = _spiPort->transfer(0);   // read register data from IC
+   _spiPort->transfer(reg);            // write address
+   result = _spiPort->transfer(0);   // read register data from IC
 
-  digitalWrite(_cs, HIGH);          // set pin high to end SPI session
-  _spiPort->endTransaction(); 
+   digitalWrite(_cs, HIGH);          // set pin high to end SPI session
+   _spiPort->endTransaction(); 
 
-  return result;
+   return result;
 }
 
 
 void MAX31856::writeByte(Max31856_Reg reg, uint8_t value)
 {
-  _spiPort->beginTransaction(_spiSettings);  
-  digitalWrite(_cs, LOW);           // set pin low to start talking to IC
+   _spiPort->beginTransaction(_spiSettings);  
+   digitalWrite(_cs, LOW);           // set pin low to start talking to IC
 
-  _spiPort->transfer(reg | 0x80);
-  _spiPort->transfer(value);
+   _spiPort->transfer(reg | 0x80);
+   _spiPort->transfer(value);
 
- digitalWrite(_cs, HIGH);          // set pin high to end SPI session
-  _spiPort->endTransaction(); 
+   digitalWrite(_cs, HIGH);          // set pin high to end SPI session
+   _spiPort->endTransaction(); 
 }
 
 
 void MAX31856::config(Tc_Type TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, Max31856_Conversion_Mode MEAS_MODE)
+{
+   config((uint8_t)TC_TYPE, FILT_FREQ, AVG_MODE, (uint8_t)MEAS_MODE);
+}
+
+
+void MAX31856::config(uint8_t TC_TYPE, uint8_t FILT_FREQ, uint8_t AVG_MODE, uint8_t MEAS_MODE)
 {
    // TC_TYPE: B_TYPE, E_TYPE, J_TYPE, K_TYPE, N_TYPE, R_TYPE, S_TYPE, T_TYPE
    // FILT_FREQ: CUTOFF_60HZ, CUTOFF_50HZ
@@ -246,8 +252,8 @@ void MAX31856::startOneShotMeasurement()
 
 void MAX31856::setColdJunctionOffset(float offsetDegC)
 {
-	// offset is 2^-4 degC/bit
-	int8_t rawValue = (int8_t)(offsetDegC * 16.0);
+   // offset is 2^-4 degC/bit
+   int8_t rawValue = (int8_t)(offsetDegC * 16.0);
 
    /*   CJTO, 09h/89h: Cold Junction Temperature Offset (int8_t, default 0x00) */
    // This function could be used to add a temperature offset based on a known difference
@@ -265,12 +271,12 @@ float MAX31856::getTemperature()
 
 float MAX31856::getColdJunctionTemperature()
 {
-	// Temperature of chip cold junction, 0.015625 deg C/bit (2^-6)
-	return (float)rawCJTemp * 0.015625;
+   // Temperature of chip cold junction, 0.015625 deg C/bit (2^-6)
+   return (float)rawCJTemp * 0.015625;
 }
 
 
 uint8_t MAX31856::getStatus()
 {
-	return status;
+   return status;
 }
