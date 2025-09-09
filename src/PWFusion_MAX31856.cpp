@@ -33,7 +33,7 @@
 * J. Steinlage      2017May08   Read TC ch, even if fault. Fix reg update fcn
 * J. Steinlage      2018Jul20   Removed DR and FLT pins since nobody uses them
 * J. Leonard        2024Apr25   Initialized TC and CJ fault threshold registers
-*
+* J. Leonard        2024Oct29   SPI workaround for ESP32 based boards
 * Playing With Fusion, Inc. invests time and resources developing open-source
 * code. Please support Playing With Fusion and continued open-source
 * development by buying products from Playing With Fusion!

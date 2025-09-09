@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="https://github.com/PlayingWithFusion/Arduino_SAMD/assets/77081880/05cc5ad2-8b62-4e97-ac00-dcc4c4118d5d" />
+    <img src="https://www.playingwithfusion.com/images/logo.svg" width="50%" />
 </p>
 
 <h1 align="center">Playing With Fusion MAX31856 Arduino Library</h1>
 
-![SEN-30005-K ISO](http://www.playingwithfusion.com/include/getimg.php?imgid=1276)
-![SEN-30006-J ISO](http://www.playingwithfusion.com/include/getimg.php?imgid=1292)
-![SEN-30007-T ISO](http://www.playingwithfusion.com/include/getimg.php?imgid=1324)
-![SEN-30008-ST ISO](http://www.playingwithfusion.com/include/getimg.php?imgid=1334)
-![SEN-30012-K ISO](http://www.playingwithfusion.com/include/getimg.php?imgid=1811)
+![SEN-30005-K ISO](https://www.playingwithfusion.com/include/getimg.php?imgid=1276)
+![SEN-30006-J ISO](https://www.playingwithfusion.com/include/getimg.php?imgid=1292)
+![SEN-30007-T ISO](https://www.playingwithfusion.com/include/getimg.php?imgid=1324)
+![SEN-30008-ST ISO](https://www.playingwithfusion.com/include/getimg.php?imgid=1334)
+![SEN-30012-K ISO](https://www.playingwithfusion.com/include/getimg.php?imgid=1811)
 
 Arduino library designed to interface Arduino-compatible hardware with the Maximum MAX31856 Thermocouple to digital converter IC over SPI, used for digitizing thermocouple measurements. Examples provided to interface with SEN-30005, SEN-30006, SEN-30007 and SEN-30008
 
